@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: joelwat/wordpress-percona
+    container_name: percona80-wordpress
+    restart: unless-stopped
+    env_file: docker/percona/.env
+    ports:
+      - '3306:3306'
+      - '33060:33060'
+    volumes:
+      - ./data/percona:/var/lib/mysql
+
+  nginx:
+    image: joelwat/nginx-1.19
+    container_name: nginx119
+    restart: unless-stopped
+    init: true
+    ports:
+      - '3000:80'
+    volumes:
+      - ./docker/nginx/conf:/etc/nginx/conf.d
+      - wordpress:/var/www/html
+    depends_on:
+      - wordpress
+
+  wordpress:
+    image: joelwat/wordpress
+    container_name: wordpress
+    restart: unless-stopped
+    env_file: docker/wordpress/.env
+    init: true
+    ports:
+      - '9000:9000'
+    volumes:
+      - ./docker/wordpress/php-conf.d/:/usr/local/etc/php/conf.d/
+      - ./docker/wordpress/fpm-conf.d/:/usr/local/etc/php-fpm.d/
+      - wordpress:/var/www/html
+      - ./src:/var/www/html/wp-content
+    depends_on:
+      - db
+
+volumes:
+  wordpress:
+
+networks:
+  default:
+    external:
+      name: my-network
