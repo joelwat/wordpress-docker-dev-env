@@ -21,6 +21,7 @@ services:
       - '3000:80'
     volumes:
       - ./docker/nginx/conf:/etc/nginx/conf.d
+      - ./src:/var/www/html/wp-content
       - wordpress:/var/www/html
     depends_on:
       - wordpress
